@@ -1,10 +1,18 @@
-Using data structure SLL
-Total service time: 1.0121 milliseconds
-Using data structure DLL
-Total service time: 0.9713 milliseconds
+SLL
+Videos: 300
+Customers: 20
+Requests: 100
+Total service time: 1.6546 milliseconds
 
-The performance comparison between Singly Linked List (SLL) and Doubly Linked List (DLL) involves evaluating factors such as time complexity, memory usage, and specific operations. While both data structures offer O(1) time complexity for insertion and deletion at the beginning, DLL outperforms SLL with its O(1) time complexity for operations at the end of the list. However, SLL exhibits better memory efficiency due to its lower memory overhead per node, while DLL consumes more memory to store references to both next and previous nodes. In terms of specific operations like traversal, both SLL and DLL have comparable performance. Therefore, the choice between SLL and DLL depends on the application's requirements: DLL may be preferable for frequent modifications at both ends of the list, prioritizing performance, while SLL might be more suitable for memory-sensitive applications with predominantly traversal-based operations. Further testing and profiling are necessary to make a conclusive decision based on the specific workload and requirements of the application.
+DLL
+Videos: 300
+Customers: 20
+Requests: 100
+Total service time: 1.5672 milliseconds
 
+BST
+Videos: 300
+Customers: 20
+Requests: 100
+Total service time: 1.1105 milliseconds
 
-Using data structure BST
-Total service time: 0.8843 milliseconds

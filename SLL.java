@@ -19,16 +19,6 @@ public class SLL<T> {
         this.head = head;
     }
 
-    public void print() {
-        Node<T> currNode = head;
-
-        while (currNode != null) {
-            System.out.print(currNode.getElement() + " ");
-            currNode = currNode.getNext();
-        }
-        System.out.println();
-    }
-
     public void insert(T data) {
         if (head == null) {
             head = new Node<T>(data, null);
@@ -68,6 +58,16 @@ public class SLL<T> {
             }
             current = current.getNext();
         }
+    }
+
+    public void print() {
+        Node<T> currNode = head;
+
+        while (currNode != null) {
+            System.out.print(currNode.getElement() + " ");
+            currNode = currNode.getNext();
+        }
+        System.out.println();
     }
 
     public void reverse() {

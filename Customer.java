@@ -14,6 +14,7 @@ public class Customer implements Comparable<Customer> {
     private String dataStructure;
     private SLL<Video> rentVideoSLL = new SLL<>();
     private DLL<Video> rentVideoDLL = new DLL<>();
+    private BST<Video> rentVideoBST = new BST<>();
 
     /**
      * Constructor.
@@ -49,9 +50,11 @@ public class Customer implements Comparable<Customer> {
      */
     public void addRentedVideo(Video video) {
         if (dataStructure.equals("SLL")) {
-            rentVideoSLL.add(video);
+            rentVideoSLL.insert(video);
         } else if (dataStructure.equals("DLL")) {
-            rentVideoDLL.addLast(video);
+            rentVideoDLL.insertAtTail(video);
+        } else if (dataStructure.equals("BST")) {
+            rentVideoBST.insert(video);
         }
     }
 
@@ -63,11 +66,11 @@ public class Customer implements Comparable<Customer> {
     public void deleteRentedVideo(Video video) {
 
         if (dataStructure.equals("SLL")) {
-            Node<Video> vidNodeSLL = rentVideoSLL.getNode(video);
-            rentVideoSLL.remove(vidNodeSLL);
+            rentVideoSLL.remove(video);
         } else if (dataStructure.equals("DLL")) {
-            Node<Video> vidNodeDLL = rentVideoDLL.getNode(video);
-            rentVideoDLL.remove(vidNodeDLL);
+            rentVideoDLL.remove(video);
+        } else if (dataStructure.equals("BST")) {
+            rentVideoBST.remove(video);
         }
     }
 
@@ -83,11 +86,13 @@ public class Customer implements Comparable<Customer> {
                 current = current.getNext();
             }
         } else if (dataStructure.equals("DLL")) {
-            Node<Video> current = rentVideoDLL.getHeader();
+            Node<Video> current = rentVideoDLL.getHead();
             while (current != null) {
                 System.out.println(current.getElement().toString());
                 current = current.getNext();
             }
+        } else if (dataStructure.equals("BST")) {
+            rentVideoBST.inorderTraversal();
         }
     }
 

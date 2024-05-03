@@ -24,12 +24,12 @@ public class VideoStore {
     private BST<Video> allVideosBST = new BST<Video>();
     private SLL<Video> rentedVideosSLL = new SLL<Video>();
     private DLL<Video> rentedVideosDLL = new DLL<Video>();
-    private BST<Video> rentedVideoBST = new BST<Video>();
+    private BST<Video> rentedVideosBST = new BST<Video>();
     private String dataStructure;
     private int numVideos;
     private int numCustomers;
     private int numRequests;
-    private Queue<Integer> requestQueue;
+    private Queue<Integer> requestQueue = new LinkedList<>();
 
     /*
      * Contructor
@@ -40,23 +40,16 @@ public class VideoStore {
         dataStructure = dataStruc;
     }
 
-    /*
-     * Constructor
-     * 
-     * @param dataStruc The data structure being used.
-     * 
-     * @param numVideos The number of videos to be initialized.
-     * 
-     * @param numCustomers The number of customers to be initialized.
-     * 
-     * @param numRequests The number of requests to be processed.
-     */
-    public VideoStore(String dataStruc, int numVideos, int numCustomers, int numRequests) {
-        this.dataStructure = dataStruc;
+    public void setNumVideos(int numVideos) {
         this.numVideos = numVideos;
+    }
+
+    public void setNumCustomers(int numCustomers) {
         this.numCustomers = numCustomers;
+    }
+
+    public void setNumRequests(int numRequests) {
         this.numRequests = numRequests;
-        this.requestQueue = new LinkedList<>();
     }
 
     /**
@@ -123,13 +116,18 @@ public class VideoStore {
 
                     Customer customer = new Customer(custName, custID, dataStructure);
                     video = new Video(title, id);
-                    checkOut(video, customer);
+                    // checkOut(video, customer);
                     break;
                 case 7: // Checks a video into the store
                     title = "Video " + (new Random().nextInt(numVideos) + 1);
                     id = "V" + (new Random().nextInt(numVideos) + 1);
+                    custName = "Customer " + (new Random().nextInt(numCustomers));
+                    custID = "C" + (new Random().nextInt(numCustomers));
+
                     video = new Video(title, id);
-                    checkIn(video);
+                    customer = new Customer(custName, custID, dataStructure);
+
+                    checkInHelp(video, customer);
                     break;
 
                 default:
@@ -139,9 +137,12 @@ public class VideoStore {
         double endTime = System.nanoTime();
         double nanoTime = endTime - startTime;
         double totalTime = nanoTime / 1_000_000.0; // converts nanoseconds to milli
+        System.out.println("Videos: " + numVideos + "\nCustomers: " + numCustomers + "\nRequests: " + numRequests);
         System.out.println("Total service time in ms: " + totalTime);
-        outputFile.println("Using data structure " + dataStructure);
+        outputFile.println(dataStructure);
+        outputFile.println("Videos: " + numVideos + "\nCustomers: " + numCustomers + "\nRequests: " + numRequests);
         outputFile.println("Total service time: " + totalTime + " milliseconds");
+        outputFile.println();
         outputFile.close();
     }
 
@@ -152,11 +153,11 @@ public class VideoStore {
      */
     private void addVideo(Video video) {
         if (dataStructure.equals("SLL")) {
-            allVideosSLL.insert(video);
+            setVideoInStore(video);
         } else if (dataStructure.equals("DLL")) {
-            allVideosDLL.addLast(video);
+            setVideoInStore(video);
         } else if (dataStructure.equals("BST")) {
-            allVideosBST.insert(video);
+            setVideoInStore(video);
         }
     }
 
@@ -167,51 +168,22 @@ public class VideoStore {
      * @return If the video was able to be deleted.
      */
     private boolean deleteVideo(Video video) {
-        boolean removed = false;
         if (dataStructure.equals("SLL")) {
-            Node<Video> vidNode = allVideosSLL.getNode(video);
-            if (vidNode != null) {
-                allVideosSLL.remove(vidNode);
-                removed = true;
-            }
-            Node<Video> vidInStoreNode = videoInStoreSLL.getNode(video);
-            if (vidInStoreNode != null) {
-                videoInStoreSLL.remove(vidInStoreNode);
-                removed = true;
-            }
-            Node<Video> rentedVidNode = rentedVideosSLL.getNode(video);
-            if (rentedVidNode != null) {
-                rentedVideosSLL.remove(rentedVidNode);
-                removed = true;
-            }
-            if (!removed) {
-                System.out.print("List does not contain video...");
-            }
+            allVideosSLL.remove(video);
+            videoInStoreSLL.remove(video);
+            rentedVideosSLL.remove(video);
+            return true;
         } else if (dataStructure.equals("DLL")) {
-            Node<Video> vidNodeDLL = allVideosDLL.getNode(video);
-            if (vidNodeDLL != null) {
-                allVideosDLL.remove(vidNodeDLL);
-                removed = true;
-            }
-            Node<Video> vidInStoreNodeDLL = videoInStoreDLL.getNode(video);
-            if (vidInStoreNodeDLL != null) {
-                videoInStoreDLL.remove(vidInStoreNodeDLL);
-                removed = true;
-            }
-            Node<Video> rentedVidNodeDLL = rentedVideosDLL.getNode(video);
-            if (rentedVidNodeDLL != null) {
-                rentedVideosDLL.remove(rentedVidNodeDLL);
-                removed = true;
-            } else {
-                System.out.print("List does not contain video...");
-                removed = false;
-            }
+            allVideosDLL.remove(video);
+            videoInStoreDLL.remove(video);
+            rentedVideosDLL.remove(video);
+            return true;
         } else if (dataStructure.equals("BST")) {
             allVideosBST.remove(video);
             videoInStoreBST.remove(video);
-            rentedVideoBST.remove(video);
+            rentedVideosBST.remove(video);
         }
-        return removed;
+        return false;
     }
 
     /**
@@ -223,7 +195,7 @@ public class VideoStore {
         if (dataStructure.equals("SLL")) {
             videoInStoreSLL.insert(video);
         } else if (dataStructure.equals("DLL")) {
-            videoInStoreDLL.addLast(video);
+            videoInStoreDLL.insertAtTail(video);
         } else if (dataStructure.equals("BST")) {
             videoInStoreBST.insert(video);
         }
@@ -238,7 +210,7 @@ public class VideoStore {
         if (dataStructure.equals("SLL")) {
             customerSLL.insert(cust);
         } else if (dataStructure.equals("DLL")) {
-            customerDLL.addLast(cust);
+            customerDLL.insertAtTail(cust);
         } else if (dataStructure.equals("BST")) {
             customerBST.insert(cust);
         }
@@ -252,23 +224,9 @@ public class VideoStore {
      */
     private boolean deleteCustomer(Customer cust) {
         if (dataStructure.equals("SLL")) {
-            Node<Customer> custNodeSLL = customerSLL.getNode(cust);
-            if (custNodeSLL != null) {
-                customerSLL.remove(custNodeSLL);
-                return true;
-            } else {
-                System.out.println("Customer not found...");
-                return false;
-            }
+            customerSLL.remove(cust);
         } else if (dataStructure.equals("DLL")) {
-            Node<Customer> custNodeDLL = customerDLL.getNode(cust);
-            if (custNodeDLL != null) {
-                customerDLL.remove(custNodeDLL);
-                return true;
-            } else {
-                System.out.println("Customer not found...");
-                return false;
-            }
+            customerDLL.remove(cust);
         } else if (dataStructure.equals("BST")) {
             customerBST.remove(cust);
         }
@@ -303,6 +261,19 @@ public class VideoStore {
         return false;
     }
 
+    public boolean checkOutHelp(Video video, Customer customer) {
+        Node<Video> videoNodeSLL = videoInStoreSLL.getNode(video);
+        Node<Customer> custNodeSLL = customerSLL.getNode(customer);
+        System.out.println(videoNodeSLL.getElement());
+        System.out.println(custNodeSLL.getElement());
+        if (videoNodeSLL != null && custNodeSLL != null) {
+            if (checkOut(videoNodeSLL, custNodeSLL)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Checks a video out of the store and into the posession of a customer.
      * 
@@ -310,36 +281,39 @@ public class VideoStore {
      * @param customer The customer checking the video out.
      * @return If the video was able to be checked-out.
      */
-    private boolean checkOut(Video video, Customer customer) {
+    private boolean checkOut(Node<Video> videoNode, Node<Customer> customerNode) {
+        Video video = videoNode.getElement();
+        Customer customer = customerNode.getElement();
         if (dataStructure.equals("SLL")) {
-            Node<Customer> custNode = customerSLL.getNode(customer);
-            Node<Video> vidNodeSLL = videoInStoreSLL.getNode(video);
-            if (videoInStoreSLL.contains(video)) {
-                Customer cust = custNode.getElement();
-                cust.addRentedVideo(video);
-                videoInStoreSLL.remove(vidNodeSLL);
-                rentedVideosSLL.insert(video);
-                System.out.println("Video rented...");
-                return true;
-            }
+            videoInStoreSLL.remove(video);
+            rentedVideosSLL.remove(video);
+            customer.addRentedVideo(video);
+            return true;
         } else if (dataStructure.equals("DLL")) {
-            Node<Customer> custNode = customerDLL.getNode(customer);
-            Node<Video> vidNodeDLL = videoInStoreDLL.getNode(video);
-            if (videoInStoreDLL.contains(video)) {
-                Customer cust = custNode.getElement();
-                cust.addRentedVideo(video);
-                videoInStoreDLL.remove(vidNodeDLL);
-                rentedVideosDLL.addLast(video);
-                System.out.println("Video rented...");
+            videoInStoreDLL.remove(video);
+            rentedVideosSLL.remove(video);
+            customer.addRentedVideo(video);
+            return true;
+        } else if (dataStructure.equals("BST")) {
+            videoInStoreBST.remove(video);
+            rentedVideosBST.remove(video);
+            customer.addRentedVideo(video);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkInHelp(Video video, Customer customer) {
+        Node<Video> videoNodeSLL = rentedVideosSLL.getNode(video);
+        Node<Customer> custNodeSLL = customerSLL.getNode(customer);
+
+        if (videoNodeSLL != null && custNodeSLL != null) {
+            System.out.println(videoNodeSLL.getElement());
+            System.out.println(custNodeSLL.getElement());
+
+            if (checkIn(videoNodeSLL, custNodeSLL)) {
                 return true;
             }
-        } else if (dataStructure.equals("BST")) {
-            if (customerBST.contains(customer)) {
-                videoInStoreBST.remove(video);
-                rentedVideoBST.insert(video);
-                customer.addRentedVideo(video);
-            }
-
         }
         return false;
     }
@@ -350,26 +324,24 @@ public class VideoStore {
      * @param video The video to check-in to the store.
      * @return If the video was able to be checked-in.
      */
-    private boolean checkIn(Video video) {
+    private boolean checkIn(Node<Video> videoNode, Node<Customer> customerNode) {
+        Video video = videoNode.getElement();
+        Customer customer = customerNode.getElement();
+
         if (dataStructure.equals("SLL")) {
-            Node<Video> vidNodeSLL = rentedVideosSLL.getNode(video);
-            if (rentedVideosSLL.contains(video)) {
-                rentedVideosSLL.remove(vidNodeSLL);
-                videoInStoreSLL.insert(video);
-                return true;
-            }
+            rentedVideosSLL.remove(video);
+            customer.deleteRentedVideo(video);
+            videoInStoreSLL.insert(video);
+            return true;
         } else if (dataStructure.equals("DLL")) {
-            Node<Video> vidNodeDLL = rentedVideosDLL.getNode(video);
-            if (rentedVideosDLL.contains(video)) {
-                rentedVideosDLL.remove(vidNodeDLL);
-                videoInStoreDLL.addLast(video);
-                return true;
-            }
+            rentedVideosDLL.remove(video);
+            customer.deleteRentedVideo(video);
+            videoInStoreDLL.insertAtTail(video);
         } else if (dataStructure.equals("BST")) {
-            if (rentedVideoBST.contains(video)) {
-                rentedVideoBST.remove(video);
-                videoInStoreBST.insert(video);
-            }
+            rentedVideosBST.remove(video);
+            customer.deleteRentedVideo(video);
+            videoInStoreBST.insert(video);
+            return true;
         }
         return false;
     }
@@ -422,7 +394,7 @@ public class VideoStore {
         } else if (dataStructure.equals("DLL")) {
             rentedVideosDLL.print();
         } else if (dataStructure.equals("BST")) {
-            rentedVideoBST.inorderTraversal();
+            rentedVideosBST.inorderTraversal();
         }
     }
 
@@ -444,22 +416,21 @@ public class VideoStore {
     }
 
     public static void main(String[] args) throws Exception {
-        String dataType = args[0]; // Either SLL or DLL
+        String dataType = args[0];
+        VideoStore store = new VideoStore(dataType);
         if (args.length > 1) { // This is if the user wants to automate the process
-            int numVideos = Integer.parseInt(args[1]);
-            int numCustomers = Integer.parseInt(args[2]);
-            int numRequests = Integer.parseInt(args[3]);
+            store.setNumVideos(Integer.parseInt(args[1]));
+            store.setNumCustomers(Integer.parseInt(args[2]));
+            store.setNumRequests(Integer.parseInt(args[3]));
 
-            VideoStore autoStore = new VideoStore(dataType, numVideos, numCustomers, numRequests);
-            autoStore.generateVideos();
-            autoStore.generateCustomers();
-            autoStore.generateRequests();
-            autoStore.processRequests();
+            store.generateVideos();
+            store.generateCustomers();
+            store.generateRequests();
+            store.processRequests();
             System.exit(0);
         }
 
         Scanner input = new Scanner(System.in);
-        VideoStore store = new VideoStore(dataType);
         int choice = 0;
         do {
             String str = "=================================\n";
@@ -564,7 +535,7 @@ public class VideoStore {
 
                     vid = new Video(title, id);
 
-                    if (store.checkOut(vid, cust)) {
+                    if (store.checkOutHelp(vid, cust)) {
                         // System.out.println("Video checked out...");
                     } else {
                         System.out.println("Could not rent video...");
@@ -574,14 +545,19 @@ public class VideoStore {
                 case 7:
                     title = input.nextLine();
                     System.out.println("Checking in video...");
+                    System.out.print("Customer name: ");
+                    custName = input.nextLine();
+                    System.out.print("Customer I.D.: ");
+                    custId = input.nextLine();
                     System.out.print("Title: ");
                     title = input.nextLine();
                     System.out.print("I.D.: ");
                     id = input.nextLine();
 
+                    cust = new Customer(custName, custId, dataType);
                     vid = new Video(title, id);
 
-                    if (store.checkIn(vid)) {
+                    if (store.checkInHelp(vid, cust)) {
                         System.out.println("\nVideo checked in...");
                     }
 
