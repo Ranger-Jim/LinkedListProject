@@ -1,1 +1,1 @@
-This was a project done to showcase the use of java and various data structures. It simulates video rental store functions including customers and videos.  It also uses singly and doubly linked lists and can output the speed at which these lists are populated.
+This was a project done to showcase the use of java and various data structures. It simulates video rental store functions including customers and videos.  It also uses singly and doubly linked lists and binary search trees, and can output the speed at which these lists are populated.
